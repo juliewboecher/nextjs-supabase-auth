@@ -6,27 +6,25 @@ export const metadata = {
   title: "Log in",
 };
 
-// A Server Action: "use server" makes it run on the server,
-// even though the form in the browser calls it
-async function logIn(formData) {
+// The same pattern as signUp, but with signInWithPassword
+async function signIn(formData) {
   "use server";
 
   const email = formData.get("email");
   const password = formData.get("password");
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.logIn({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  // Something went wrong: back to the form with ?error=true in the URL
   if (error) {
-    redirect("/signup?error=true");
+    redirect("/login?error=true");
   }
 
   redirect("/");
 }
 
-export default async function LogInPage({ searchParams }) {
-  // ?error=true is set by signUp when Supabase says no
+export default async function LoginPage({ searchParams }) {
+  // ?error=true is set by signIn when the email or password is wrong
   const { error } = await searchParams;
 
   return (
@@ -34,16 +32,16 @@ export default async function LogInPage({ searchParams }) {
       <h1>Log in</h1>
       {error && (
         <p className="form-error" role="alert">
-          Could not sign up. Maybe the email is already in use.
+          Wrong email or password.
         </p>
       )}
-      <form action={logIn} className="auth-form">
+      <form action={signIn} className="auth-form">
         <label htmlFor="email">Email</label>
         <input
           id="email"
           name="email"
           type="email"
-          placeholder="Your email"
+          placeholder="you@example.com"
           autoComplete="email"
           required
         />
@@ -61,7 +59,7 @@ export default async function LogInPage({ searchParams }) {
         <button type="submit">Log in</button>
       </form>
       <p>
-        Dont have an account yet? <Link href="/signup">Sign up</Link>
+        No account yet? <Link href="/signup">Sign up</Link>
       </p>
     </main>
   );
